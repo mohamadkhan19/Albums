@@ -1,13 +1,15 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
-  Text,
   FlatList,
   TouchableOpacity,
   Image,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 
 const PhotosScreen = () => {
   const [photos, setPhotos] = useState([]);
@@ -38,21 +40,37 @@ const PhotosScreen = () => {
     </View>
   );
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: showAllPhotos ? 'All Photos' : 'Album Title',
+      headerTitleAlign: Platform.OS === 'android' ? 'center' : 'left',
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.headerButton}>
+          <Icon name={'arrow-left'} size={25} color="white" />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={toggleShowAllPhotos}
+          style={styles.headerButton}>
+          <FontAwesomeIcon
+            name={showAllPhotos ? 'star' : 'star-o'}
+            size={25}
+            color="white"
+          />
+        </TouchableOpacity>
+      ),
+      headerStyle: {
+        backgroundColor: '#DF6E57',
+      },
+      headerTintColor: 'white',
+    });
+  }, [navigation, showAllPhotos]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.navigationTitle}>
-        {showAllPhotos ? 'All Photos' : photos.title}
-      </Text>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}>
-        <Text style={styles.backButtonText}>&lt; Back</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={toggleShowAllPhotos}
-        style={styles.toggleButton}>
-        <Text style={styles.toggleButtonText}>(Star)</Text>
-      </TouchableOpacity>
       <FlatList
         data={photos}
         numColumns={3}
@@ -63,7 +81,6 @@ const PhotosScreen = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

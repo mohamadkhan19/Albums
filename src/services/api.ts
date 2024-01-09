@@ -20,7 +20,7 @@ export const baseQuery: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, state, extraOptions) => {
-  const baseUrl = '';
+  const baseUrl = 'https://jsonplaceholder.typicode.com/';
 
   const response = await rawBaseQuery(baseUrl)(args, state, extraOptions);
   return response;

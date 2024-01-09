@@ -1,5 +1,12 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, SectionList, TouchableOpacity} from 'react-native';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
+import {
+  View,
+  Text,
+  SectionList,
+  TouchableOpacity,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 const AlbumsScreen = () => {
@@ -7,6 +14,22 @@ const AlbumsScreen = () => {
   const [albumsByUser, setAlbumsByUser] = useState({});
   const [deletedAlbums, setDeletedAlbums] = useState([]);
   const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Albums',
+      headerRight: () => (
+        <TouchableOpacity onPress={resetData}>
+          <Text style={styles.resetButtonText}>Reset</Text>
+        </TouchableOpacity>
+      ),
+      headerTitleAlign: Platform.OS === 'android' ? 'center' : 'left',
+      headerStyle: {
+        backgroundColor: '#DF6E57', // Set your desired background color
+      },
+      headerTintColor: 'white',
+    });
+  }, [navigation]);
 
   // Fetch user data and albums data
   useEffect(() => {
@@ -40,21 +63,14 @@ const AlbumsScreen = () => {
     ]);
   };
 
+  const resetData = () => {
+    setDeletedAlbums([]); // Reset the deleted albums
+  };
+
   const handleAlbumPress = (userId, albumId) => {
     // Navigate to the photos screen with the selected albumId
     navigation.navigate('PhotoScreen', {userId, albumId});
   };
-
-  const renderAlbumItem = ({item, section}) => (
-    <TouchableOpacity
-      onPress={() => handleAlbumPress(section.userId, item.id)}
-      onLongPress={() => handleDeleteAlbum(section.userId, item.id)}>
-      <View
-        style={{padding: 16, borderBottomWidth: 1, borderBottomColor: '#ccc'}}>
-        <Text style={{fontSize: 18}}>{item.title}</Text>
-      </View>
-    </TouchableOpacity>
-  );
 
   // Filter out deleted albums before rendering
   const filteredAlbums = userId =>
@@ -70,13 +86,43 @@ const AlbumsScreen = () => {
     data: filteredAlbums(user.id),
   }));
 
+  const renderAlbumItem = ({item, section}) => {
+    const shouldWrapText = item.title.length > 20;
+
+    return (
+      <View style={styles.albumContainer}>
+        <TouchableOpacity onPress={() => handleAlbumPress(item.id)}>
+          <Text
+            style={{
+              fontSize: 18,
+              flexWrap: shouldWrapText ? 'wrap' : 'nowrap',
+              color: 'black',
+            }}>
+            {item.title}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleDeleteAlbum(section.userId, item.id)}
+          style={styles.deleteIconContainer}>
+          <Text style={styles.deleteIcon}>&times;</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <View>
       <SectionList
         sections={sections}
         keyExtractor={(item, index) => item.id.toString() + index}
         renderSectionHeader={({section: {title}}) => (
-          <Text style={{fontSize: 20, textAlign: 'center', padding: 16}}>
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: 'center',
+              padding: 16,
+              color: 'black',
+            }}>
             {title}
           </Text>
         )}
@@ -87,3 +133,42 @@ const AlbumsScreen = () => {
 };
 
 export default AlbumsScreen;
+
+const styles = StyleSheet.create({
+  albumContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    borderRadius: 10,
+    margin: 8,
+    backgroundColor: 'white',
+  },
+  deleteIconContainer: {
+    marginLeft: 8,
+  },
+  deleteIcon: {
+    fontSize: 20,
+    color: 'red',
+  },
+  sectionHeader: {
+    fontSize: 20,
+    textAlign: 'center',
+    padding: 16,
+    backgroundColor: '#DF6E57',
+    color: 'white',
+    borderRadius: 10, // Set border radius for rounded corners
+    marginHorizontal: 8, // Add margin for spacing
+  },
+  resetButton: {
+    position: 'absolute',
+    top: 20,
+    right: 16,
+  },
+  resetButtonText: {
+    fontSize: 16,
+    color: 'white',
+  },
+});

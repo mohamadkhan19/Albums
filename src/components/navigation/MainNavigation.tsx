@@ -7,9 +7,7 @@ const Stack = createNativeStackNavigator();
 
 const MainNavigation = () => {
   return (
-    <Stack.Navigator
-      screenOptions={() => ({header: () => null})}
-      initialRouteName="AlbumScreen">
+    <Stack.Navigator initialRouteName="AlbumScreen">
       <Stack.Screen name="AlbumScreen" component={AlbumScreen} />
       <Stack.Screen name="PhotoScreen" component={PhotoScreen} />
     </Stack.Navigator>
