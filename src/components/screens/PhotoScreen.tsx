@@ -28,7 +28,6 @@ const PhotosScreen: React.FC = () => {
   const {albumId} = route.params as RouteParams;
 
   useEffect(() => {
-    // Fetch photos based on the selected album or all photos if showAllPhotos is true
     const url = showAllPhotos
       ? 'https://jsonplaceholder.typicode.com/photos'
       : `https://jsonplaceholder.typicode.com/photos?albumId=${albumId}`;

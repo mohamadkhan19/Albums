@@ -40,20 +40,17 @@ const AlbumsScreen: React.FC = () => {
       ),
       headerTitleAlign: Platform.OS === 'android' ? 'center' : 'left',
       headerStyle: {
-        backgroundColor: '#DF6E57', // Set your desired background color
+        backgroundColor: '#DF6E57',
       },
       headerTintColor: 'white',
     });
   }, [navigation]);
 
-  // Fetch user data and albums data
   useEffect(() => {
-    // Fetch user data
     fetch('https://jsonplaceholder.typicode.com/users')
       .then(response => response.json())
       .then((usersData: User[]) => {
         setUsers(usersData);
-        // Fetch albums data for each user
         const albumPromises = usersData.map(user =>
           fetch(
             `https://jsonplaceholder.typicode.com/albums?userId=${user.id}`,
@@ -71,7 +68,6 @@ const AlbumsScreen: React.FC = () => {
   }, []);
 
   const handleDeleteAlbum = (userId: number, albumId: number) => {
-    // Update deletedAlbums state in memory
     setDeletedAlbums(prevDeletedAlbums => [
       ...prevDeletedAlbums,
       {userId, albumId},
@@ -79,23 +75,19 @@ const AlbumsScreen: React.FC = () => {
   };
 
   const resetData = () => {
-    setDeletedAlbums([]); // Reset the deleted albums
+    setDeletedAlbums([]);
   };
 
   const handleAlbumPress = (userId: number, albumId: number) => {
-    // Navigate to the photos screen with the selected albumId
-    console.log({albumId});
     navigation.navigate('PhotoScreen', {userId, albumId});
   };
 
-  // Filter out deleted albums before rendering
   const filteredAlbums = (userId: number): Album[] =>
     albumsByUser[userId]?.filter(
       album =>
         !deletedAlbums.some(a => a.userId === userId && a.albumId === album.id),
     ) || [];
 
-  // Transform data into sections
   const sections = users.map(user => ({
     title: user.name ? `${user.name}'s Albums` : 'Loading...',
     userId: user.id,
@@ -182,8 +174,8 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#DF6E57',
     color: 'white',
-    borderRadius: 10, // Set border radius for rounded corners
-    marginHorizontal: 8, // Add margin for spacing
+    borderRadius: 10,
+    marginHorizontal: 8,
   },
   resetButton: {
     position: 'absolute',
