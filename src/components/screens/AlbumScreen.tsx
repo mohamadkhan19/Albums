@@ -69,6 +69,7 @@ const AlbumsScreen = () => {
 
   const handleAlbumPress = (userId, albumId) => {
     // Navigate to the photos screen with the selected albumId
+    console.log({albumId})
     navigation.navigate('PhotoScreen', {userId, albumId});
   };
 
@@ -91,7 +92,7 @@ const AlbumsScreen = () => {
 
     return (
       <View style={styles.albumContainer}>
-        <TouchableOpacity onPress={() => handleAlbumPress(item.id)}>
+        <TouchableOpacity onPress={() => handleAlbumPress(item.userId, item.id)}>
           <Text
             style={{
               fontSize: 18,
