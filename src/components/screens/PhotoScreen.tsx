@@ -11,12 +11,21 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 
-const PhotosScreen = () => {
-  const [photos, setPhotos] = useState([]);
+interface Photo {
+  id: number;
+  thumbnailUrl: string;
+}
+
+interface RouteParams {
+  albumId?: number;
+}
+
+const PhotosScreen: React.FC = () => {
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
-  const albumId = route.params?.albumId;
+  const {albumId} = route.params as RouteParams;
 
   useEffect(() => {
     // Fetch photos based on the selected album or all photos if showAllPhotos is true
@@ -26,7 +35,7 @@ const PhotosScreen = () => {
 
     fetch(url)
       .then(response => response.json())
-      .then(photosData => setPhotos(photosData))
+      .then((photosData: Photo[]) => setPhotos(photosData))
       .catch(error => console.error('Error fetching photos data:', error));
   }, [albumId, showAllPhotos]);
 
@@ -34,7 +43,7 @@ const PhotosScreen = () => {
     setShowAllPhotos(prevShowAllPhotos => !prevShowAllPhotos);
   };
 
-  const renderPhotoItem = ({item}) => (
+  const renderPhotoItem = ({item}: {item: Photo}) => (
     <View style={styles.photoContainer}>
       <Image source={{uri: item.thumbnailUrl}} style={styles.photo} />
     </View>
@@ -81,34 +90,15 @@ const PhotosScreen = () => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 20,
     paddingHorizontal: 16,
   },
-  navigationTitle: {
-    fontSize: 20,
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 16,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: 'blue',
-  },
-  toggleButton: {
-    position: 'absolute',
-    top: 20,
-    right: 16,
-  },
-  toggleButtonText: {
-    fontSize: 16,
-    color: 'blue',
+  headerButton: {
+    padding: 10,
   },
   photoList: {
     flexGrow: 1,

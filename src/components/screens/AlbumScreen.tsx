@@ -9,10 +9,25 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-const AlbumsScreen = () => {
-  const [users, setUsers] = useState([]);
-  const [albumsByUser, setAlbumsByUser] = useState({});
-  const [deletedAlbums, setDeletedAlbums] = useState([]);
+interface User {
+  id: number;
+  name: string;
+}
+
+interface Album {
+  id: number;
+  userId: number;
+  title: string;
+}
+
+const AlbumsScreen: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [albumsByUser, setAlbumsByUser] = useState<{[key: number]: Album[]}>(
+    {},
+  );
+  const [deletedAlbums, setDeletedAlbums] = useState<
+    {userId: number; albumId: number}[]
+  >([]);
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -36,7 +51,7 @@ const AlbumsScreen = () => {
     // Fetch user data
     fetch('https://jsonplaceholder.typicode.com/users')
       .then(response => response.json())
-      .then(usersData => {
+      .then((usersData: User[]) => {
         setUsers(usersData);
         // Fetch albums data for each user
         const albumPromises = usersData.map(user =>
@@ -45,7 +60,7 @@ const AlbumsScreen = () => {
           ).then(response => response.json()),
         );
         Promise.all(albumPromises).then(albumsData => {
-          const albumsByUserObj = {};
+          const albumsByUserObj: {[key: number]: Album[]} = {};
           usersData.forEach((user, index) => {
             albumsByUserObj[user.id] = albumsData[index];
           });
@@ -55,7 +70,7 @@ const AlbumsScreen = () => {
       .catch(error => console.error('Error fetching data:', error));
   }, []);
 
-  const handleDeleteAlbum = (userId, albumId) => {
+  const handleDeleteAlbum = (userId: number, albumId: number) => {
     // Update deletedAlbums state in memory
     setDeletedAlbums(prevDeletedAlbums => [
       ...prevDeletedAlbums,
@@ -67,14 +82,14 @@ const AlbumsScreen = () => {
     setDeletedAlbums([]); // Reset the deleted albums
   };
 
-  const handleAlbumPress = (userId, albumId) => {
+  const handleAlbumPress = (userId: number, albumId: number) => {
     // Navigate to the photos screen with the selected albumId
-    console.log({albumId})
+    console.log({albumId});
     navigation.navigate('PhotoScreen', {userId, albumId});
   };
 
   // Filter out deleted albums before rendering
-  const filteredAlbums = userId =>
+  const filteredAlbums = (userId: number): Album[] =>
     albumsByUser[userId]?.filter(
       album =>
         !deletedAlbums.some(a => a.userId === userId && a.albumId === album.id),
@@ -87,12 +102,19 @@ const AlbumsScreen = () => {
     data: filteredAlbums(user.id),
   }));
 
-  const renderAlbumItem = ({item, section}) => {
+  const renderAlbumItem = ({
+    item,
+    section,
+  }: {
+    item: Album;
+    section: {userId: number};
+  }) => {
     const shouldWrapText = item.title.length > 20;
 
     return (
       <View style={styles.albumContainer}>
-        <TouchableOpacity onPress={() => handleAlbumPress(item.userId, item.id)}>
+        <TouchableOpacity
+          onPress={() => handleAlbumPress(item.userId, item.id)}>
           <Text
             style={{
               fontSize: 18,
