@@ -1,11 +1,11 @@
 import React, {useEffect} from 'react';
-// import SplashScreen from 'react-native-splash-screen';
+import SplashScreen from 'react-native-splash-screen';
 import Albums from './Albums';
 
 function App() {
-  // useEffect(() => {
-  //   SplashScreen.hide();
-  // }, []);
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
 
   return <Albums />;
 }
