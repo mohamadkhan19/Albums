@@ -78,8 +78,8 @@ const AlbumsScreen: React.FC = () => {
     setDeletedAlbums([]);
   };
 
-  const handleAlbumPress = (userId: number, albumId: number) => {
-    navigation.navigate('PhotoScreen', {userId, albumId});
+  const handleAlbumPress = (userId: number, albumId: number, title: string) => {
+    navigation.navigate('PhotoScreen', {userId, albumId, title});
   };
 
   const filteredAlbums = (userId: number): Album[] =>
@@ -106,7 +106,7 @@ const AlbumsScreen: React.FC = () => {
     return (
       <View style={styles.albumContainer}>
         <TouchableOpacity
-          onPress={() => handleAlbumPress(item.userId, item.id)}>
+          onPress={() => handleAlbumPress(item.userId, item.id, item.title)}>
           <Text
             style={{
               fontSize: 18,

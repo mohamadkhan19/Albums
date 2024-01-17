@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useLayoutEffect} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import {
   View,
   FlatList,
@@ -10,10 +10,20 @@ import {
 import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import {useDispatch, useSelector} from 'react-redux';
+import {setAllPhotos, setPhotos} from '../../store/photos/photoSlice';
+import {useGetAllPhotosQuery, useGetPhotosQuery} from '../../services/api';
 
 interface Photo {
   id: number;
   thumbnailUrl: string;
+}
+
+interface RootState {
+  photos: {
+    photos: Photo[];
+    allPhotos: Photo[];
+  };
 }
 
 interface RouteParams {
@@ -21,22 +31,24 @@ interface RouteParams {
 }
 
 const PhotosScreen: React.FC = () => {
-  const [photos, setPhotos] = useState<Photo[]>([]);
+  const dispatch = useDispatch();
+  const {data: photosData} = useGetPhotosQuery();
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
-  const {albumId} = route.params as RouteParams;
+  const {albumId, title} = route.params as RouteParams;
+  const {photos, allPhotos} = useSelector((state: RootState) => state.photos);
+  const {data: allPhotosData} = useGetAllPhotosQuery(albumId);
 
   useEffect(() => {
-    const url = showAllPhotos
-      ? 'https://jsonplaceholder.typicode.com/photos'
-      : `https://jsonplaceholder.typicode.com/photos?albumId=${albumId}`;
+    if (photosData) {
+      dispatch(setPhotos(photosData as Photo[]));
+    }
 
-    fetch(url)
-      .then(response => response.json())
-      .then((photosData: Photo[]) => setPhotos(photosData))
-      .catch(error => console.error('Error fetching photos data:', error));
-  }, [albumId, showAllPhotos]);
+    if (allPhotosData) {
+      dispatch(setAllPhotos(allPhotosData as Photo[]));
+    }
+  }, [dispatch, photosData, allPhotosData]);
 
   const toggleShowAllPhotos = () => {
     setShowAllPhotos(prevShowAllPhotos => !prevShowAllPhotos);
@@ -50,7 +62,7 @@ const PhotosScreen: React.FC = () => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: showAllPhotos ? 'All Photos' : 'Album Title',
+      headerTitle: showAllPhotos ? 'All Photos' : title,
       headerTitleAlign: Platform.OS === 'android' ? 'center' : 'left',
       headerLeft: () => (
         <TouchableOpacity
@@ -80,7 +92,7 @@ const PhotosScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={photos}
+        data={showAllPhotos ? allPhotos : photos}
         numColumns={3}
         keyExtractor={item => item.id.toString()}
         renderItem={renderPhotoItem}

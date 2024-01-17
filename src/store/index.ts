@@ -8,6 +8,8 @@ import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
 import {persistReducer, persistStore} from 'redux-persist';
 import {api} from '../services/api';
 import network from './network/networkSlice';
+import albums from './albums/albumSlice';
+import photos from './photos/photoSlice';
 
 const persistConfig = {
   key: 'root',
@@ -18,6 +20,8 @@ const persistConfig = {
 const rootReducer = combineReducers({
   [api.reducerPath]: api.reducer,
   network,
+  albums,
+  photos,
 });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
