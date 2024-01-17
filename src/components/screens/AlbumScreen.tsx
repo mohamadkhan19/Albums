@@ -9,10 +9,25 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-const AlbumsScreen = () => {
-  const [users, setUsers] = useState([]);
-  const [albumsByUser, setAlbumsByUser] = useState({});
-  const [deletedAlbums, setDeletedAlbums] = useState([]);
+interface User {
+  id: number;
+  name: string;
+}
+
+interface Album {
+  id: number;
+  userId: number;
+  title: string;
+}
+
+const AlbumsScreen: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
+  const [albumsByUser, setAlbumsByUser] = useState<{[key: number]: Album[]}>(
+    {},
+  );
+  const [deletedAlbums, setDeletedAlbums] = useState<
+    {userId: number; albumId: number}[]
+  >([]);
   const navigation = useNavigation();
 
   useLayoutEffect(() => {
@@ -25,27 +40,24 @@ const AlbumsScreen = () => {
       ),
       headerTitleAlign: Platform.OS === 'android' ? 'center' : 'left',
       headerStyle: {
-        backgroundColor: '#DF6E57', // Set your desired background color
+        backgroundColor: '#DF6E57',
       },
       headerTintColor: 'white',
     });
   }, [navigation]);
 
-  // Fetch user data and albums data
   useEffect(() => {
-    // Fetch user data
     fetch('https://jsonplaceholder.typicode.com/users')
       .then(response => response.json())
-      .then(usersData => {
+      .then((usersData: User[]) => {
         setUsers(usersData);
-        // Fetch albums data for each user
         const albumPromises = usersData.map(user =>
           fetch(
             `https://jsonplaceholder.typicode.com/albums?userId=${user.id}`,
           ).then(response => response.json()),
         );
         Promise.all(albumPromises).then(albumsData => {
-          const albumsByUserObj = {};
+          const albumsByUserObj: {[key: number]: Album[]} = {};
           usersData.forEach((user, index) => {
             albumsByUserObj[user.id] = albumsData[index];
           });
@@ -55,8 +67,7 @@ const AlbumsScreen = () => {
       .catch(error => console.error('Error fetching data:', error));
   }, []);
 
-  const handleDeleteAlbum = (userId, albumId) => {
-    // Update deletedAlbums state in memory
+  const handleDeleteAlbum = (userId: number, albumId: number) => {
     setDeletedAlbums(prevDeletedAlbums => [
       ...prevDeletedAlbums,
       {userId, albumId},
@@ -64,35 +75,38 @@ const AlbumsScreen = () => {
   };
 
   const resetData = () => {
-    setDeletedAlbums([]); // Reset the deleted albums
+    setDeletedAlbums([]);
   };
 
-  const handleAlbumPress = (userId, albumId) => {
-    // Navigate to the photos screen with the selected albumId
-    console.log({albumId})
-    navigation.navigate('PhotoScreen', {userId, albumId});
+  const handleAlbumPress = (userId: number, albumId: number, title: string) => {
+    navigation.navigate('PhotoScreen', {userId, albumId, title});
   };
 
-  // Filter out deleted albums before rendering
-  const filteredAlbums = userId =>
+  const filteredAlbums = (userId: number): Album[] =>
     albumsByUser[userId]?.filter(
       album =>
         !deletedAlbums.some(a => a.userId === userId && a.albumId === album.id),
     ) || [];
 
-  // Transform data into sections
   const sections = users.map(user => ({
     title: user.name ? `${user.name}'s Albums` : 'Loading...',
     userId: user.id,
     data: filteredAlbums(user.id),
   }));
 
-  const renderAlbumItem = ({item, section}) => {
+  const renderAlbumItem = ({
+    item,
+    section,
+  }: {
+    item: Album;
+    section: {userId: number};
+  }) => {
     const shouldWrapText = item.title.length > 20;
 
     return (
       <View style={styles.albumContainer}>
-        <TouchableOpacity onPress={() => handleAlbumPress(item.userId, item.id)}>
+        <TouchableOpacity
+          onPress={() => handleAlbumPress(item.userId, item.id, item.title)}>
           <Text
             style={{
               fontSize: 18,
@@ -160,8 +174,8 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#DF6E57',
     color: 'white',
-    borderRadius: 10, // Set border radius for rounded corners
-    marginHorizontal: 8, // Add margin for spacing
+    borderRadius: 10,
+    marginHorizontal: 8,
   },
   resetButton: {
     position: 'absolute',
